@@ -54,23 +54,25 @@ func postMetrics(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}
 
-	if "gauge" != typeMetric && "counter" != typeMetric {
+	if typeMetric != "gauge" && typeMetric != "counter" {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	if r.PathValue("typeMetrics") == "gauge" {
+	if r.PathValue("typeMetric") == "gauge" {
 		valueFloat, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		memStorage.Set(name, valueFloat)
 		w.Header().Add("Content-Type", "text-plain")
 		w.Write([]byte(fmt.Sprintf(name, value)))
 	}
-	if r.PathValue("typeMetrics") == "counter" {
+	if r.PathValue("typeMetric") == "counter" {
 		valueInt, err := strconv.Atoi(value)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		memStorage.Update(name, int64(valueInt))
 		w.Header().Add("Content-Type", "text-plain")
